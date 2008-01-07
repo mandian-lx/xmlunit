@@ -45,6 +45,7 @@ BuildRequires:  jpackage-utils >= 0:1.7.3
 BuildRequires:  java-rpmbuild >= 0:1.4.2
 BuildRequires:  ant >= 0:1.6.5
 BuildRequires:  ant-junit
+BuildRequires:  ant-trax
 BuildRequires:  junit >= 0:3.8.1
 BuildRequires:  xalan-j2
 BuildRequires:  xerces-j2
