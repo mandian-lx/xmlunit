@@ -34,7 +34,7 @@
 
 Name:           xmlunit
 Version:        1.0
-Release:        %mkrel 5.0.0
+Release:        %mkrel 5.0.1
 Epoch:          0
 Summary:        Provides classes to do asserts on xml
 License:        BSD-like
@@ -53,7 +53,7 @@ Requires:       junit >= 0:3.8
 Requires:       xalan-j2
 Requires:       xml-commons-apis
 Requires:       jaxp_parser_impl
-Group:          Development/Testing
+Group:          Development/Java
 %if ! %{gcj_support}
 BuildArch:      noarch
 %endif
