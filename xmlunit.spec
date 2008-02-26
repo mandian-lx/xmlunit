@@ -33,13 +33,12 @@
 %define section free
 
 Name:           xmlunit
-Version:        1.0
-Release:        %mkrel 5.0.1
+Version:        1.1
+Release:        %mkrel 0.0.1
 Epoch:          0
 Summary:        Provides classes to do asserts on xml
 License:        BSD-like
-Source0:        http://download.sourceforge.net/xmlunit/xmlunit1.0.zip
-Source1:        http://repo1.maven.org/maven2/xmlunit/xmlunit/1.0/xmlunit-1.0.pom
+Source0:        http://download.sourceforge.net/xmlunit/xmlunit-1.1-src.zip
 URL:            http://xmlunit.sourceforge.net/
 BuildRequires:  jpackage-utils >= 0:1.7.3
 BuildRequires:  java-rpmbuild >= 0:1.4.2
@@ -75,15 +74,12 @@ expressions.
 %package        javadoc
 Summary:        Javadoc for %{name}
 Group:          Development/Java
-Requires(post):   /bin/rm,/bin/ln
-Requires(postun): /bin/rm
 
 %description    javadoc
 Javadoc for %{name}
 
 %prep
-%setup -q -n %{name}
-# remove all binary libs and javadocs
+%setup -q -n %{name}-%{version}
 %remove_java_binaries
 
 cat >build.properties <<EOF
@@ -93,34 +89,29 @@ test.report.dir=test
 EOF
 
 %build
-%{ant} -Dbuild.compiler=modern jar test docs
-
+%{ant} -Dbuild.compiler=modern jar javadocs
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
-install -m 0644 lib/%{name}%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
+install -m 0644 build/lib/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
 %add_to_maven_depmap %{name} %{name} %{version} JPP %{name}
 
-# Jar versioning
-(cd $RPM_BUILD_ROOT%{_javadir} && for jar in *-%{version}.jar; do ln -sf ${jar} `echo $jar| sed "s|-%{version}||g"`; done)
+%create_jar_links
 
 # poms
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
 
-install -m 644 %{SOURCE1} \
+install -m 644 build/lib/%{name}-%{version}.pom \
     $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP-%{name}.pom
-
 
 # Javadoc
 mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -pr build/doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
+%{gcj_compile}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -140,14 +131,10 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(0644,root,root,0755)
 %{_javadir}/*
-%doc README.txt LICENSE.txt XMLUnit.pdf example.html
+%doc README.txt LICENSE.txt 
 %{_datadir}/maven2/poms/*
 %{_mavendepmapfragdir}
-%if %{gcj_support}
-%dir %attr(-,root,root) %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/%{name}-%{version}.jar.*
-%endif
-
+%{gcj_files}
 
 %files javadoc
 %defattr(0644,root,root,0755)
