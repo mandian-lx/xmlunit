@@ -27,18 +27,17 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-%define _with_gcj_support 1
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
 
+%define gcj_support 0
 %define section free
 
 Name:           xmlunit
-Version:        1.1
+Version:        1.2
 Release:        %mkrel 0.0.1
 Epoch:          0
 Summary:        Provides classes to do asserts on xml
 License:        BSD-like
-Source0:        http://download.sourceforge.net/xmlunit/xmlunit-1.1-src.zip
+Source0:        http://download.sourceforge.net/xmlunit/xmlunit-%{version}-src.zip
 URL:            http://xmlunit.sourceforge.net/
 BuildRequires:  jpackage-utils >= 0:1.7.3
 BuildRequires:  java-rpmbuild >= 0:1.4.2
