@@ -33,7 +33,7 @@
 
 Name:           xmlunit
 Version:        1.2
-Release:        %mkrel 2.0.1
+Release:        %mkrel 2.0.2
 Epoch:          0
 Summary:        Provides classes to do asserts on xml
 License:        BSD-like
