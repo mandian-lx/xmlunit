@@ -28,19 +28,16 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define gcj_support 0
-%define section free
-
 Name:           xmlunit
-Version:        1.2
-Release:        %mkrel 2.0.2
-Epoch:          0
+Version:        1.3
+Release:        4
 Summary:        Provides classes to do asserts on xml
-License:        BSD-like
-Source0:        http://download.sourceforge.net/xmlunit/xmlunit-%{version}-src.zip
+License:        BSD
+Source0:        http://downloads.sourceforge.net/project/xmlunit/xmlunit%20for%20Java/XMLUnit%20for%20Java%201.3/xmlunit-1.3-src.zip
+Source1:        http://repo1.maven.org/maven2/xmlunit/xmlunit/1.0/xmlunit-1.0.pom
 URL:            http://xmlunit.sourceforge.net/
 BuildRequires:  jpackage-utils >= 0:1.7.3
-BuildRequires:  java-rpmbuild >= 0:1.4.2
+BuildRequires:  java-devel >= 0:1.6.0
 BuildRequires:  ant >= 0:1.6.5
 BuildRequires:  ant-junit
 BuildRequires:  ant-trax
@@ -48,21 +45,14 @@ BuildRequires:  junit >= 0:3.8.1
 BuildRequires:  xalan-j2
 BuildRequires:  xerces-j2
 BuildRequires:  xml-commons-apis
+#BuildRequires:  dblatex
+#BuildRequires:  docbook5-style-xsl
 Requires:       junit >= 0:3.8
 Requires:       xalan-j2
 Requires:       xml-commons-apis
-Requires:       jaxp_parser_impl
+Requires:       jpackage-utils
 Group:          Development/Java
-%if ! %{gcj_support}
 BuildArch:      noarch
-%endif
-%if %{gcj_support}
-BuildRequires:    java-gcj-compat-devel
-%endif
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-Requires(post):    jpackage-utils >= 0:1.7.3
-Requires(postun):  jpackage-utils >= 0:1.7.3
-
 
 %description
 XMLUnit extends JUnit to simplify unit testing of XML. It compares a control
@@ -73,69 +63,68 @@ expressions.
 %package        javadoc
 Summary:        Javadoc for %{name}
 Group:          Development/Java
+Requires:       jpackage-utils
 
 %description    javadoc
 Javadoc for %{name}
 
 %prep
-%setup -q -n %{name}-%{version}
-%remove_java_binaries
+%setup -q 
+# remove all binary libs and javadocs
+find . -name "*.jar" -exec rm -f {} \;
+rm -rf doc
 
 cat >build.properties <<EOF
 junit.lib=$(build-classpath junit)
-xmlxsl.lib=$(build-classpath xalan-j2 xerces-j2)
+xmlxsl.lib=$(build-classpath xalan-j2 xalan-j2-serializer xerces-j2)
 test.report.dir=test
 EOF
 
+cat >docbook.properties <<EOF
+db5.xsl=%{_datadir}/sgml/docbook/xsl-ns-stylesheets
+EOF
+
+#Fix wrong-file-end-of-line-encoding
+sed -i 's/\r//g' README.txt LICENSE.txt
+
 %build
-%{ant} -Dbuild.compiler=modern jar javadocs
+export CLASSPATH=$(build-classpath xalan-j2-serializer)
+ant -Dbuild.compiler=modern -Dfailonerror=false jar javadocs
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
-install -m 0644 build/lib/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}-%{version}.jar
+install -m 0644 build/lib/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
 %add_to_maven_depmap %{name} %{name} %{version} JPP %{name}
-
-%create_jar_links
 
 # poms
 install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
 
-install -m 644 build/lib/%{name}-%{version}.pom \
+install -m 644 %{SOURCE1} \
     $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP-%{name}.pom
+
 
 # Javadoc
 mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr build/doc/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -pr build/doc/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-
-%{gcj_compile}
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %post
 %update_maven_depmap
-%if %{gcj_support}
-%{update_gcjdb}
-%endif
 
 %postun
 %update_maven_depmap
-%if %{gcj_support}
-%{clean_gcjdb}
-%endif
 
 %files
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %{_javadir}/*
-%doc README.txt LICENSE.txt 
+%doc README.txt LICENSE.txt userguide/XMLUnit-Java.pdf 
 %{_datadir}/maven2/poms/*
-%{_mavendepmapfragdir}
-%{gcj_files}
+%{_mavendepmapfragdir}/*
 
 %files javadoc
-%defattr(0644,root,root,0755)
+%defattr(-,root,root,-)
 %doc %{_javadocdir}/%{name}-%{version}
 %doc %{_javadocdir}/%{name}
+
