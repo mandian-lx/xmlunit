@@ -30,7 +30,7 @@
 
 Name:           xmlunit
 Version:        1.3
-Release:        4
+Release:        6
 Summary:        Provides classes to do asserts on xml
 License:        BSD
 Source0:        http://downloads.sourceforge.net/project/xmlunit/xmlunit%20for%20Java/XMLUnit%20for%20Java%201.3/xmlunit-1.3-src.zip
