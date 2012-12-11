@@ -128,3 +128,34 @@ ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 %doc %{_javadocdir}/%{name}-%{version}
 %doc %{_javadocdir}/%{name}
 
+
+
+%changelog
+* Sun Nov 27 2011 Guilherme Moro <guilherme@mandriva.com> 1.3-6
++ Revision: 734309
+- rebuild
+- imported package xmlunit
+
+* Wed Sep 09 2009 Thierry Vignaud <tv@mandriva.org> 0:1.2-2.0.2mdv2010.0
++ Revision: 435155
+- rebuild
+
+* Sat Aug 09 2008 Thierry Vignaud <tv@mandriva.org> 0:1.2-2.0.1mdv2009.0
++ Revision: 269800
+- rebuild early 2009.0 package (before pixel changes)
+
+* Fri Jun 13 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.2-0.0.1mdv2009.0
++ Revision: 218670
+- new version 1.2 and disable gcj compile
+
+* Tue Feb 26 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.1-0.0.1mdv2008.1
++ Revision: 175331
+- new version, spec cleanup, use pom from the tar
+
+* Mon Jan 07 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.0-5.0.1mdv2008.1
++ Revision: 146299
+- add ant-trax BR
+- fix Group
+- import xmlunit
+
+
