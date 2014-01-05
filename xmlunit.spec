@@ -1,3 +1,4 @@
+%{?_javapackages_macros:%_javapackages_macros}
 # Copyright (c) 2000-2007, JPackage Project
 # All rights reserved.
 #
@@ -29,29 +30,28 @@
 #
 
 Name:           xmlunit
-Version:        1.3
-Release:        6
+Version:        1.5
+Release:        1.0%{?dist}
+Epoch:          0
 Summary:        Provides classes to do asserts on xml
 License:        BSD
-Source0:        http://downloads.sourceforge.net/project/xmlunit/xmlunit%20for%20Java/XMLUnit%20for%20Java%201.3/xmlunit-1.3-src.zip
+Source0:        http://downloads.sourceforge.net/xmlunit/xmlunit-1.5-src.zip
 Source1:        http://repo1.maven.org/maven2/xmlunit/xmlunit/1.0/xmlunit-1.0.pom
 URL:            http://xmlunit.sourceforge.net/
-BuildRequires:  jpackage-utils >= 0:1.7.3
-BuildRequires:  java-devel >= 0:1.6.0
-BuildRequires:  ant >= 0:1.6.5
+BuildRequires:  jpackage-utils
+BuildRequires:  java-devel >= 1:1.6.0
+BuildRequires:  ant
 BuildRequires:  ant-junit
-BuildRequires:  ant-trax
-BuildRequires:  junit >= 0:3.8.1
+BuildRequires:  junit
 BuildRequires:  xalan-j2
 BuildRequires:  xerces-j2
 BuildRequires:  xml-commons-apis
-#BuildRequires:  dblatex
-#BuildRequires:  docbook5-style-xsl
-Requires:       junit >= 0:3.8
+
+Requires:       junit
 Requires:       xalan-j2
 Requires:       xml-commons-apis
 Requires:       jpackage-utils
-Group:          Development/Java
+
 BuildArch:      noarch
 
 %description
@@ -62,21 +62,20 @@ expressions.
 
 %package        javadoc
 Summary:        Javadoc for %{name}
-Group:          Development/Java
-Requires:       jpackage-utils
 
 %description    javadoc
 Javadoc for %{name}
 
 %prep
 %setup -q 
+sed -i /java.class.path/d build.xml
 # remove all binary libs and javadocs
 find . -name "*.jar" -exec rm -f {} \;
 rm -rf doc
 
 cat >build.properties <<EOF
 junit.lib=$(build-classpath junit)
-xmlxsl.lib=$(build-classpath xalan-j2 xalan-j2-serializer xerces-j2)
+xmlxsl.lib=
 test.report.dir=test
 EOF
 
@@ -88,74 +87,118 @@ EOF
 sed -i 's/\r//g' README.txt LICENSE.txt
 
 %build
-export CLASSPATH=$(build-classpath xalan-j2-serializer)
-ant -Dbuild.compiler=modern -Dfailonerror=false jar javadocs
+ant -Dbuild.compiler=modern -Dhaltonfailure=yes jar javadocs
 
 %install
-rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 install -m 0644 build/lib/%{name}-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
-%add_to_maven_depmap %{name} %{name} %{version} JPP %{name}
 
 # poms
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
+install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
 
 install -m 644 %{SOURCE1} \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP-%{name}.pom
+    $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
 
+%add_maven_depmap
 
 # Javadoc
-mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr build/doc/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+mkdir -p $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+cp -pr build/doc/api/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 
-%post
-%update_maven_depmap
+%check
+ant
 
-%postun
-%update_maven_depmap
+%pretrans javadoc -p <lua>
+-- we changed symlink to dir in 1.4-2, workaround RPM issues
+path = '%{_javadocdir}/%{name}'
+if posix.readlink(path) then
+   os.remove(path)
+end
 
-%files
-%defattr(-,root,root,-)
-%{_javadir}/*
+
+%files -f .mfiles
 %doc README.txt LICENSE.txt userguide/XMLUnit-Java.pdf 
-%{_datadir}/maven2/poms/*
-%{_mavendepmapfragdir}/*
 
 %files javadoc
-%defattr(-,root,root,-)
-%doc %{_javadocdir}/%{name}-%{version}
 %doc %{_javadocdir}/%{name}
 
-
-
 %changelog
-* Sun Nov 27 2011 Guilherme Moro <guilherme@mandriva.com> 1.3-6
-+ Revision: 734309
-- rebuild
-- imported package xmlunit
+* Fri Oct 11 2013 Dr. Tilmann Bubeck <tilmann@bubecks.de> - 0:1.5-1
+- update to upstream's xmlunit-1.5
 
-* Wed Sep 09 2009 Thierry Vignaud <tv@mandriva.org> 0:1.2-2.0.2mdv2010.0
-+ Revision: 435155
-- rebuild
+* Fri Sep 27 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 0:1.4-4
+- Enable test suite
+- Resolves: rhbz#987412
 
-* Sat Aug 09 2008 Thierry Vignaud <tv@mandriva.org> 0:1.2-2.0.1mdv2009.0
-+ Revision: 269800
-- rebuild early 2009.0 package (before pixel changes)
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.4-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
-* Fri Jun 13 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.2-0.0.1mdv2009.0
-+ Revision: 218670
-- new version 1.2 and disable gcj compile
+* Wed Jun 12 2013 Stanislav Ochotnicky <sochotnicky@redhat.com> - 0:1.4-2
+- Update to latest packaging guidelines
+- Cleanup BuildRequires
 
-* Tue Feb 26 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.1-0.0.1mdv2008.1
-+ Revision: 175331
-- new version, spec cleanup, use pom from the tar
+* Fri Feb 15 2013 Dr. Tilmann Bubeck <t.bubeck@reinform.de> - 0:1.4-1
+- update to upstream's xmlunit-1.4
 
-* Mon Jan 07 2008 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.0-5.0.1mdv2008.1
-+ Revision: 146299
-- add ant-trax BR
-- fix Group
-- import xmlunit
+* Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.3-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
+* Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.3-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Thu Dec 30 2010 Alexander Kurtakov <akurtako@redhat.com> 0:1.3-3
+- Build javadoc only.
+
+* Thu Dec 30 2010 Alexander Kurtakov <akurtako@redhat.com> 0:1.3-2
+- BR java 1.6 to prevent gcj failure.
+
+* Thu Dec 30 2010 Alexander Kurtakov <akurtako@redhat.com> 0:1.3-1
+- Update to new upstream.
+- Drop gcj.
+- Rebuild docs.
+
+* Thu Mar 11 2010 Peter Lemenkov <lemenkov@gmail.com> - 0:1.0-8.3
+- Added missing Requires jpackage-utils
+
+* Mon Jul 27 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.0-8.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
+* Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.0-7.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
+* Thu Jul 10 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0:1.0-6.2
+- drop repotag
+
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0:1.0-6jpp.1
+- Autorebuild for GCC 4.3
+
+* Thu Jan 17 2008 Permaine Cheung <pcheung@redhat.com> - 0:1.0-5jpp.1
+- Update to the same version as upstream
+
+ Tue Dec 18 2007 Ralph Apel <r.apel at r-apel.de> - 0:1.0-5jpp
+- Add poms and depmap frags
+- Make Vendor, Distribution based on macro
+- Add gcj_support option
+
+* Mon Mar 12 2007 Permaine Cheung <pcheung@redhat.com> - 0:1.0-4jpp.1
+- Add missing BR, patch to build javadoc, and other rpmlint issues
+
+* Mon May 08 2006 Ralph Apel <r.apel at r-apel.de> - 0:1.0-4jpp
+- First JPP-1.7 release
+
+* Thu Aug 26 2004 Ralph Apel <r.apel at r-apel.de> - 0:1.0-3jpp
+- Build with ant-1.6.2
+
+* Wed Dec 17 2003 Paul Nasrat <pauln at truemesh.com> - 0:1.0-2jpp
+- Fix license and improved description
+- Thanks to Ralph Apel who produced a spec - merged version info
+
+* Wed Dec 17 2003 Paul Nasrat <pauln at truemesh.com> - 0:1.0-1jpp
+- Initial Version
