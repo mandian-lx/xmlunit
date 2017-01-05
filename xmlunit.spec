@@ -1,5 +1,5 @@
 Summary:	Testing and comparing XML output for Java and .NET
-Name:		%{name}
+Name:		xmlunit
 Version:	2.3.0
 Release:	1
 License:	ASL 2.0
