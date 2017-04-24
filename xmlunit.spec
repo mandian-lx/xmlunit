@@ -76,7 +76,7 @@ find . -name "*.class" -delete
 
 # Legacy compatibility
 %mvn_alias org.xmlunit:xmlunit-legacy:pom: xmlunit:xmlunit:pom:
-%mvn_alias org.xmlunit:xmlunit-legacy org.xmlunit.xmlunit-legacy
+%mvn_alias org.xmlunit:xmlunit-legacy xmlunit:xmlunit
 
 %build
 %mvn_build
