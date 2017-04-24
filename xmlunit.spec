@@ -1,3 +1,5 @@
+%{?_javapackages_macros:%_javapackages_macros}
+
 Summary:	Testing and comparing XML output for Java and .NET
 Name:		xmlunit
 Version:	2.3.0
@@ -11,6 +13,7 @@ BuildArch:	noarch
 BuildRequires:	jpackage-utils
 BuildRequires:	java-headless
 BuildRequires:	maven-local
+BuildRequires:	mvn(org.apache.maven.plugins:maven-shade-plugin)
 BuildRequires:	mvn(org.hamcrest:hamcrest-core)
 BuildRequires:	mvn(org.hamcrest:hamcrest-library)
 # The followings are required for tests only
