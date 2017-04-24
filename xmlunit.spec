@@ -65,7 +65,7 @@ find . -name "*.jar" -delete
 find . -name "*.class" -delete
 
 # Remove failing plugin
-%pom_rempve_plugin :buildnumber-maven-plugin
+%pom_remove_plugin :buildnumber-maven-plugin
 
 # Fix jar-not-indexed warning
 %pom_xpath_inject "pom:plugin[pom:artifactId[./text()='maven-jar-plugin']]/pom:configuration/pom:archive" "
