@@ -74,6 +74,10 @@ find . -name "*.class" -delete
 %pom_xpath_inject "pom:plugin[pom:artifactId[./text()='maven-jar-plugin']]/pom:configuration/pom:archive" "
 	<index>true</index>"
 
+# Legacy compatibility
+%mvn_alias org.xmlunit:xmlunit-legacy:pom: xmlunit:xmlunit:pom:
+%mvn_alias org.xmlunit:xmlunit-legacy org.xmlunit.xmlunit-legacy
+
 %build
 %mvn_build
 
